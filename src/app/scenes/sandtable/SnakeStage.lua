@@ -8,7 +8,8 @@ function M:ctor(color, mountPoint, width, height)
 end
 
 function M:_initUI(width, height)
-    local sp = display.newSprite("stage.png")
+    --local sp = display.newSprite("stage.png")
+    local sp = display.newSprite("head.jpg")
         :addTo(self)
 
     local size = sp:getContentSize()

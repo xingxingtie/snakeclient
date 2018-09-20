@@ -18,6 +18,15 @@ function M:ctor(line, row, mapWidth, mapHeight)
     self._mapRTData = MapRTData:create()
 
     self._snakeList = {}
+
+    self:_initUI()
+end
+
+function M:_initUI()
+    local bg = display.newSprite("map.jpg")
+        :addTo(self)
+        :move(display.cx, display.cy)
+    bg:setScale(1.4)
 end
 
 --获取地图像素坐标

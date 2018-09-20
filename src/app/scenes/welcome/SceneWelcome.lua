@@ -62,7 +62,7 @@ function M:onEnter()
 
     print("开始登录服务器")
     --开始连接服务器
-    G_SocketTCP:connect("192.168.147.128", 8888)
+    G_SocketTCP:connect("192.168.81.108", 8888)
 end
 
 --离开

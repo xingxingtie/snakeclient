@@ -24,10 +24,10 @@ function M:_initUI()
     self._layerMap = LayerMap:create(Const.LINE, Const.ROW, Const.MapWidth, Const.MapHeight)
         :addTo(self)    
 
-    local snake = Snake:create(1, 10000, cc.p(20, 30), cc.p(1, 30), Const.DIR_RIGHT, Const.StepDuration)
+    local snake = Snake:create(1, 10000, cc.p(20, 5), cc.p(1, 10), Const.DIR_RIGHT, Const.StepDuration)
     self._snakeList[1] = snake
 
-    local snake = Snake:create(2, 20000, cc.p(20, 10), cc.p(1, 10), Const.DIR_RIGHT, Const.StepDuration)
+    local snake = Snake:create(2, 20000, cc.p(20, 5), cc.p(1, 5), Const.DIR_RIGHT, Const.StepDuration)
     self._snakeList[2] = snake
 
     self._layerMap:enterSnake(self._snakeList[1])
