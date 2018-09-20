@@ -1,0 +1,1 @@
+call .\simulator\win32\hello.exe -writable-path .\workdir\ -workdir .\
