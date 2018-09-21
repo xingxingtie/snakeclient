@@ -4,14 +4,15 @@ local LayerMap = require("app.scenes.sandtable.LayerMap")
 local Const = require("app.const.Const")
 local Snake = require("app.scenes.sandtable.Snake")
 local SimServer = require("app.scenes.sandtable.SimServer")
+local ConstMsgID = require("app.const.ConstMsgID")
 local M = class("SceneSandTable", cc.Scene)
 
 function M:ctor()
     self._commandList = {}     --命令列表
   
-    self._nextTurnIndex = 0    --下一个待执行的轮
+    self._nextTurnIndex = 1    --下一个待执行的回合索引 nextTurnIndex ==1 执行完后指导第1回合的游戏表现。 nextTurnIndex ==x执行完后指导第x回合的游戏表现。
     self._maxTurnIndex  = 0    --收到的最大的轮回索引号
-    self._currentTurn   = 1    --当前轮
+    self._currentTurn   = 0    --当前正在表现的回合
 
     self._snakeList = {}
     self:_initUI()
@@ -22,49 +23,73 @@ end
 
 function M:_initUI()
     self._layerMap = LayerMap:create(Const.LINE, Const.ROW, Const.MapWidth, Const.MapHeight)
-        :addTo(self)    
+        :addTo(self)
 
-    local snake = Snake:create(1, 10000, cc.p(20, 5), cc.p(1, 10), Const.DIR_RIGHT, Const.StepDuration)
-    self._snakeList[1] = snake
+    self:_addKeyBoardListener()
+end
 
-    local snake = Snake:create(2, 20000, cc.p(20, 5), cc.p(1, 5), Const.DIR_RIGHT, Const.StepDuration)
-    self._snakeList[2] = snake
+function M:_addKeyBoardListener()
+    local lookTable = {
+        [28] = Const.DIR_UP,
+        [29] = Const.DIR_DOWN,
+        [26] = Const.DIR_LEFT,
+        [27] = Const.DIR_RIGHT,
+    }
 
-    self._layerMap:enterSnake(self._snakeList[1])
-    self._layerMap:enterSnake(self._snakeList[2])
+    local onKeyReleased = function ( keycode, event )
+        if(lookTable[keycode]) then 
+            local cmd = {
+                cmdType = Const.CMD_CHANG_DIR, 
+                cmdValue = lookTable[keycode]
+            }
+            self:_sendCommand(cmd)
+        end
+    end
+    
+    local listener = cc.EventListenerKeyboard:create()
+    listener:registerScriptHandler(onKeyReleased, cc.Handler.EVENT_KEYBOARD_RELEASED )
+    local eventDispatcher = self:getEventDispatcher()
+    eventDispatcher:addEventListenerWithSceneGraphPriority(listener, self)
+end
 
-    --self._server = SimServer:create(self, self._layerMap)
+--发送个人命令
+function M:_sendCommand(cmd)
+    print("发送命令&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
+    local code = G_MsgManager:packData(
+        ConstMsgID.c2s_userop, "c2s_userop", 
+        cmd)
+
+    G_SocketTCP:send(code)
 end
 
 --处理命令
-function M:_doCommand(cmd)
-    --dump(cmd)
-    for k,v in ipairs(cmd) do
+function M:_doCommand(cmdList)
+    --dump(cmdList, "cmdList")
+    local movedFlag = {}
 
-        local moved = false
-        for _, userCmd in ipairs(v.cmdList) do
-            local id = v.id
+    for k,v in ipairs(cmdList.turnCmd) do 
 
-            if(userCmd.cmdType == Const.CMD_NONE and not moved) then 
+        if v.cmdType == Const.CMD_NONE and not movedFlag[v.userID] then 
 
-                self._layerMap:moveSnake(id)
+            self._layerMap:moveSnake(v.userID)
 
-                moved = true
+            movedFlag[v.userID] = true
 
-            elseif (userCmd.cmdType == Const.CMD_CHANG_DIR and not moved) then 
+        elseif (v.cmdType == Const.CMD_CHANG_DIR and not movedFlag[v.userID]) then 
 
-                self._layerMap:moveSnake(id, userCmd.cmdValue)
+            self._layerMap:moveSnake(v.userID, v.cmdValue)
 
-                moved = true
-            end
+            movedFlag[v.userID] = true
         end
     end
+
+    --print("执行成功..........................", self._nextTurnIndex)
+
     --只要执行一条命令 则下一个待执行的轮回索引+1    
     self._nextTurnIndex = self._nextTurnIndex + 1
 
     --新一轮开始后，重置更新时间
     self._updateElapse = 0
-
     self._overTime = false
 end
 
@@ -83,7 +108,8 @@ end
 
 --一轮到时间后开始执行命令
 function M:_overtimeTurn()
-    --print("一轮时间到 开始执行", self._commandList[self._nextTurnIndex])
+    --print("一轮时间到 开始执行", self._commandList[self._nextTurnIndex], self._nextTurnIndex, #self._commandList)
+    --dump(self._commandList, "self._commandList")
     local nextCmd = self._commandList[self._nextTurnIndex]
 
     --命令已到位则执行
@@ -97,14 +123,12 @@ end
 
 --更新帧
 function M:_update(dt)
+    --print("update")
     self._updateElapse = self._updateElapse + dt
-
-    --print(dt, self._updateElapse)
 
     self._updateElapse = math.min(self._updateElapse, Const.StepDuration)
 
-    self._layerMap:update(self._updateElapse)
-
+    --超时则表现层停止
     if not self._overTime then 
         self._layerMap:update(self._updateElapse)
     end
@@ -115,31 +139,41 @@ function M:_update(dt)
 end
 
 --启动沙盘
-function M:run()
+function M:run(firstTurnOP)
+
     self._timer = cc.Director:getInstance():getScheduler():scheduleScriptFunc(
         handler(self, self._overtimeTurn), 
         0.1, 
         false)
 
-    self:_doCommand({
-        {id = 1, cmdList = {{cmdType = Const.CMD_NONE, cmdValue = 0}} },
-        {id = 2, cmdList = {{cmdType = Const.CMD_NONE, cmdValue = 0}} },
-    })
-
     --启用帧事件
     self:scheduleUpdate(handler(self, self._update))
 
-    --self._server:run()
+    --添加指导第一回合表现的命令
+    self:_onMsgTurnCommand(firstTurnOP)
+
+    --手动超时一次
+    self:_overtimeTurn()
+
+    --注册网络消息
+    G_MsgManager:registerMsgProcess(
+        ConstMsgID.s2c_turnop, 
+        "s2c_turnop", 
+        handler(self, self._onMsgTurnCommand))
+
 end
 
 --一轮的命令到达
-function M:onMsgTurnCommand(cmd)
+function M:_onMsgTurnCommand(cmd)
+    --dump(cmd, "cmd")
+
     --print("命令到达", cmd.turnIndex, self._currentTurn, self._nextTurnIndex)
 
     local turnIndex = cmd.turnIndex
+    --print(self._nextTurnIndex .. "  " .. turnIndex)
 
     --数据晚到，则立马进行执行
-    if(self._nextTurnIndex == turnIndex and self._currentTurn > self._nextTurnIndex) then
+    if(self._nextTurnIndex == turnIndex and self._currentTurn >= self._nextTurnIndex) then
         self:_doCommand(cmd)
     end
 
@@ -149,20 +183,37 @@ function M:onMsgTurnCommand(cmd)
     end
 
     --发生了服务器轮回大于当前轮回的情况
-    if self._maxTurnIndex > self._currentTurn then 
-        assert(false, "发生了服务器轮回大于当前轮回的情况")
-    end
+    -- if self._maxTurnIndex > (self._currentTurn + 1) then 
+    --     assert(false, "发生了服务器轮回大于当前轮回的情况")
+    -- end
 
     --发生了掉包情况
-    if self._maxTurnIndex > self._nextTurnIndex then 
-        self:_acquireTurnMsg()
-    end
+    -- if self._maxTurnIndex > self._nextTurnIndex then 
+    --     self:_acquireTurnMsg()
+    -- end
 
     self._commandList[turnIndex] = cmd
 end
 
+function M:addPlayer(playerList)
+    for k,v in pairs(playerList) do 
+
+        local snake = Snake:create(
+            v.id, 
+            10000, 
+            cc.p(20, 5), 
+            cc.p(1, 10), 
+            Const.DIR_RIGHT, 
+            Const.StepDuration)
+
+        table.insert(self._snakeList, snake)
+
+        self._layerMap:enterSnake(snake)
+    end
+end
+
 function M:onEnter()
-    self:run()
+
 end
 
 return M

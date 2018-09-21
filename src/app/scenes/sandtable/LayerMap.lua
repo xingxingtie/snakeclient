@@ -53,7 +53,7 @@ end
 
 --放入一条蛇,蛇新加入时没有显示对象需要构造
 function M:enterSnake(snake)
-    print("蛇进入:" .. snake:getID())
+    --print("蛇进入:" .. snake:getID())
 
     self:_renderSnake(snake)
 
@@ -62,6 +62,7 @@ end
 
 --移动蛇 在这个点进行碰撞检测
 function M:moveSnake(snakeID, dir)
+    --print("更新蛇！！！！！！！！！！！！！！！！")
     local snake = self._snakeList[snakeID]
 
     dir = dir or snake:getDir()
@@ -89,7 +90,7 @@ end
 
 --精准时钟来移动蛇
 function M:update(elapse)
-    for k, v in ipairs(self._snakeList) do
+    for k, v in pairs(self._snakeList) do
         v:update(elapse)
     end
 end

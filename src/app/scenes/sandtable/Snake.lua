@@ -56,6 +56,7 @@ function M:moveTo(dir, stageWidth, stageHeight)
     local preStage = nil
 
     local body = self:getBody()
+    --print("蛇身长度", #body)
     -- for k, v in ipairs(body) do 
     --     print("move前:", v.x, v.y)
     -- end
@@ -81,8 +82,8 @@ function M:moveTo(dir, stageWidth, stageHeight)
 
             preStage = v
 
-            -- print("蛇头起始位置:", v.x, v.y)
-            -- print("蛇头目标位置:", v.targetX, v.targetY, v.sp:getPosition())
+            --print("蛇头起始位置:", v.x, v.y)
+            --print("蛇头目标位置:", v.targetX, v.targetY, v.sp:getPosition())
         end
     end
 

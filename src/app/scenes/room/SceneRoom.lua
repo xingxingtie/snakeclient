@@ -5,6 +5,7 @@ local ConstMsgID = require("app.const.ConstMsgID")
 local M = class("SceneRoom", cc.Scene)
 function M:ctor() 
     self:_initUI()
+
     self:enableNodeEvents()
 end
 
@@ -24,16 +25,29 @@ function M:_initUI()
     btn:setTouchEnabled(true)
     btn:onClick(handler(self, self.onBtnMatchClick))
     btn:setAnchorPoint(0.5, 0.5)
+
+    --沙盘场景
+    self._sandScene = SceneSandTable:create()
+    self._sandScene:retain()
 end
 
 --匹配
 function M:_onMsgMatch(msg)
-    print("玩家匹配结束...")
+
+    dump(msg.userList, "匹配玩家列表")
+    
+    self._sandScene:addPlayer(msg.userList)
+
 end
 
 --游戏开始
 function M:_onMsgGameStart(msg)
-    display.runScene(SceneSandTable:create())
+
+    dump(msg, "游戏开始")
+
+    self._sandScene:run(msg.turnCmd)
+
+    display.runScene(self._sandScene)
 end
 
 function M:onEnter()

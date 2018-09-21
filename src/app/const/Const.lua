@@ -2,10 +2,8 @@ local M = {}
 
 M.DELTAGROUP = 10000   --队伍放大因子
 
--- M.LINE = 50 / 2      --地图被分成的行数
--- M.ROW  = 89 / 2       --地图被分成的列数
-M.LINE = 13      --地图被分成的行数
-M.ROW  = 20      --地图被分成的列数
+M.LINE = 50       --地图被分成的行数
+M.ROW  = 89       --地图被分成的列数
 M.MapWidth  = 1280     --地图总宽度
 M.MapHeight = 720      --地图总高度
 
@@ -28,5 +26,10 @@ M.DIR_STEP = {
 M.CMD_NONE      = 0    --无命令
 M.CMD_CHANG_DIR = 1    --改变方向
 M.CMD_ADD_SPEED = 2    --加速
+
+--M.IP = "192.168.147.128"
+--M.IP = "192.168.81.108"
+M.IP = "120.78.83.33"
+
 
 return M

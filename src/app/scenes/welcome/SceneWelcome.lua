@@ -2,6 +2,7 @@
 
 local SceneRoom = require("app.scenes.room.SceneRoom")
 local ConstMsgID = require("app.const.ConstMsgID")
+local Const = require("app.const.Const")
 
 local M = class("SceneWelcome", cc.load("mvc").ViewBase)
 
@@ -45,6 +46,7 @@ function M:_onMsgLogin(msg)
     end
     
     if msg.retCode == 0 then 
+        G_GameData:setGameID(msg.id)
         print("登录成功 我的id是:" .. msg.id)
     else 
         print("登录失败....")    
@@ -62,7 +64,7 @@ function M:onEnter()
 
     print("开始登录服务器")
     --开始连接服务器
-    G_SocketTCP:connect("192.168.81.108", 8888)
+    G_SocketTCP:connect(Const.IP, 8888)
 end
 
 --离开
