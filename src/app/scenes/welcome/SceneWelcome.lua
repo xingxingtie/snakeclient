@@ -3,6 +3,7 @@
 local SceneRoom = require("app.scenes.room.SceneRoom")
 local ConstMsgID = require("app.const.ConstMsgID")
 local Const = require("app.const.Const")
+local EventConst = require("app.signal.EventConst")
 
 local M = class("SceneWelcome", cc.load("mvc").ViewBase)
 
@@ -40,7 +41,6 @@ end
 
 --登录成功
 function M:_onMsgLogin(msg)
-
     for k,v in pairs(msg) do 
         print(k, v)
     end
@@ -48,21 +48,30 @@ function M:_onMsgLogin(msg)
     if msg.retCode == 0 then 
         G_GameData:setGameID(msg.id)
         print("登录成功 我的id是:" .. msg.id)
-    else 
-        print("登录失败....")    
+    else
+        print("登录失败....", msg.retCode)    
     end
 
     self.btnEnter:setTouchEnabled(true)
 end
 
---进入
-function M:onEnter()
+function M:_onEventConnect()
     G_MsgManager:registerMsgProcess(
         ConstMsgID.s2c_login, 
         "s2c_login", 
         handler(self, self._onMsgLogin))
 
-    print("开始登录服务器")
+    local code = G_MsgManager:packData(0, "c2s_login", {
+        account = "leilei",
+        password = "xingxingtie"})
+
+    G_SocketTCP:send(code)
+end
+
+--进入
+function M:onEnter()
+    G_Signal:addEventListener(EventConst.EVENT_CONNECT, handler(self,self._onEventConnect), 1)
+
     --开始连接服务器
     G_SocketTCP:connect(Const.IP, 8888)
 end
