@@ -1,6 +1,8 @@
 --c++底层注册lpack
 require("pack")
 
+require("app.extend.gameNodeEx")
+
 local SOCKETCONST = require("app.socket.SOCKETCONST")
 
 --整个游戏数据

@@ -66,8 +66,6 @@ function M:moveTo(dir, stageWidth, stageHeight)
             v.targetX = preStage.x 
             v.targetY = preStage.y
 
-           
-
             v.dataX = preStage.dataX
             v.dataY = preStage.dataY
 

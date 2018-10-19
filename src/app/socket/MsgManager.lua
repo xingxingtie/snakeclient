@@ -14,11 +14,11 @@ function M:ctor(fileName)
 
     self:_launchSocket()
 end
-
+ 
 function M:_launchSocket()
     local timer = cc.Director:getInstance():getScheduler():scheduleScriptFunc(
         function() G_SocketTCP:update() end,
-        0.05,  
+        0.01,  
         false)
 end
 

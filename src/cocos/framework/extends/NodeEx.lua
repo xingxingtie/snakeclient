@@ -226,3 +226,10 @@ function Node:onCleanup_()
     end
     self:onCleanupCallback_()
 end
+
+function Node:callAfter(seconds, fn)
+    local arr = {cc.DelayTime:create(seconds),
+                    cc.CallFunc:create(fn)}
+    self:runAction(cc.Sequence:create(arr))
+    return self
+end

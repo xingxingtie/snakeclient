@@ -1,6 +1,7 @@
 
 
 local SceneRoom = require("app.scenes.room.SceneRoom")
+local SceneLogin = require("app.scenes.login.SceneLogin")
 local ConstMsgID = require("app.const.ConstMsgID")
 local Const = require("app.const.Const")
 local EventConst = require("app.signal.EventConst")
@@ -8,12 +9,17 @@ local EventConst = require("app.signal.EventConst")
 local M = class("SceneWelcome", cc.load("mvc").ViewBase)
 
 function M:onCreate()
-    -- add background image
+    self:enableNodeEvents()
+
+    self:_initUI()
+end
+
+function M:_initUI()
     -- display.newSprite("bg.jpg")
     --     :move(display.center)
     --     :addTo(self)
-
     -- add HelloWorld label
+
     local label = cc.Label:createWithSystemFont("欢迎界面", "Arial", 40)
         :move(0, display.height)
         :addTo(self)
@@ -25,55 +31,26 @@ function M:onCreate()
     btn:setTitleText("进 入")
     btn:setTitleColor(cc.c3b(0xff, 0xff, 0xff))
     btn:setTitleFontSize(39)
-    btn:setTouchEnabled(false)
+    btn:setTouchEnabled(true)
     btn:onClick(handler(self, self.onBtnEnterClick))
     btn:setAnchorPoint(0.5, 0.5)
-
-    self:enableNodeEvents()
-    
-    self.btnEnter = btn
 end
 
 --按键进入
 function M:onBtnEnterClick(sender)
-    display.runScene(SceneRoom:create())
-end
-
---登录成功
-function M:_onMsgLogin(msg)
-    for k,v in pairs(msg) do 
-        print(k, v)
-    end
-    
-    if msg.retCode == 0 then 
-        G_GameData:setGameID(msg.id)
-        print("登录成功 我的id是:" .. msg.id)
-    else
-        print("登录失败....", msg.retCode)    
-    end
-
-    self.btnEnter:setTouchEnabled(true)
-end
-
-function M:_onEventConnect()
-    G_MsgManager:registerMsgProcess(
-        ConstMsgID.s2c_login, 
-        "s2c_login", 
-        handler(self, self._onMsgLogin))
-
-    local code = G_MsgManager:packData(0, "c2s_login", {
-        account = "leilei",
-        password = "xingxingtie"})
-
-    G_SocketTCP:send(code)
-end
-
---进入
-function M:onEnter()
     G_Signal:addEventListener(EventConst.EVENT_CONNECT, handler(self,self._onEventConnect), 1)
 
     --开始连接服务器
     G_SocketTCP:connect(Const.IP, 8888)
+end
+
+function M:_onEventConnect()
+    display.runScene(SceneLogin:create())
+end
+
+--进入
+function M:onEnter()
+   
 end
 
 --离开
