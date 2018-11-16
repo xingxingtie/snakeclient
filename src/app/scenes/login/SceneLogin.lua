@@ -1,13 +1,14 @@
 --登录场景
-
 local M = class("SceneLogin", cc.Scene)
 local SceneRoom = require("app.scenes.room.SceneRoom")
+local SceneHall = require("app.scenes.hall.SceneHall")
 local SceneRegister = require("app.scenes.register.SceneRegister")
-local ConstMsgID = require("app.const.ConstMsgID")
-
+local cursor  = require("app.tool.cursor")
 
 function M:ctor() 
     self:_initUI()
+
+    self:_registerMsgProcess()
 
     self:enableNodeEvents()
 end
@@ -24,18 +25,27 @@ function M:_initUI()
     local btnRegister = ui.root:getChildByName("btn_register")
     btnRegister:onClick(handler(self, self._onBtnRegister))    
 
-    self._TFAccount = ui.root:getChildByName("input_account")
+    self._TFAccount  = ui.root:getChildByName("input_account")
     self._TFPassword = ui.root:getChildByName("input_password")
+    self._RefText    = ui.root:getChildByName("ref_text")
+
+    cursor.attachCusor(self._TFAccount, self._RefText)
+    cursor.attachCusor(self._TFPassword, self._RefText)
+end
+
+function M:_registerMsgProcess()
+    G_MsgManager:registerMsgProcess(
+        "s2c_login", 
+        handler(self, self._onMsgLogin))
 end
 
 --登录成功
 function M:_onMsgLogin(msg)    
     if msg.retCode == 0 then 
         G_GameData:setGameID(msg.id)
-        display.runScene(SceneRoom:create())
-        self:toast("登录成功")
+        display.runScene(SceneHall:create())
     else
-        self:toast("登录失败, errorID:%d", msg.retCode)
+        self:toastErrorCode(msg.retCode)
     end
 end
 
@@ -50,17 +60,19 @@ end
 
 --登录
 function M:_onBtnLogin()
-    G_MsgManager:registerMsgProcess(
-        ConstMsgID.s2c_login, 
-        "s2c_login", 
-        handler(self, self._onMsgLogin))
+    if self._TFAccount:getString() == "" then 
+        self._TFAccount:setString("tuo")
+    end
+
+    if self._TFPassword:getString() == "" then 
+        self._TFPassword:setString("haha")
+    end    
 
     local code = G_MsgManager:packData(
-        ConstMsgID.c2s_login, 
         "c2s_login", 
         {
-            account = "xian", --self._TFAccount:getString(),
-            password = "1",   --self._TFPassword:getString(),
+            account = self._TFAccount:getString(),
+            password = self._TFPassword:getString(),
         })
 
     G_SocketTCP:send(code)

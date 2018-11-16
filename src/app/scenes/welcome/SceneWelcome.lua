@@ -2,7 +2,6 @@
 
 local SceneRoom = require("app.scenes.room.SceneRoom")
 local SceneLogin = require("app.scenes.login.SceneLogin")
-local ConstMsgID = require("app.const.ConstMsgID")
 local Const = require("app.const.Const")
 local EventConst = require("app.signal.EventConst")
 
@@ -41,10 +40,12 @@ function M:onBtnEnterClick(sender)
     G_Signal:addEventListener(EventConst.EVENT_CONNECT, handler(self,self._onEventConnect), 1)
 
     --开始连接服务器
+    print("尝试连接")
     G_SocketTCP:connect(Const.IP, 8888)
 end
 
 function M:_onEventConnect()
+    print("连接成功")
     display.runScene(SceneLogin:create())
 end
 

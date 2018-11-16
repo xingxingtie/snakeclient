@@ -4,7 +4,6 @@ local LayerMap = require("app.scenes.sandtable.LayerMap")
 local Const = require("app.const.Const")
 local Snake = require("app.scenes.sandtable.Snake")
 local SimServer = require("app.scenes.sandtable.SimServer")
-local ConstMsgID = require("app.const.ConstMsgID")
 local M = class("SceneSandTable", cc.Scene)
 
 function M:ctor()
@@ -54,9 +53,8 @@ end
 
 --发送个人命令
 function M:_sendCommand(cmd)
-    print("发送命令&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
     local code = G_MsgManager:packData(
-        ConstMsgID.c2s_userop, "c2s_userop", 
+        "c2s_userop", 
         cmd)
 
     G_SocketTCP:send(code)
@@ -157,7 +155,6 @@ function M:run(firstTurnOP)
 
     --注册网络消息
     G_MsgManager:registerMsgProcess(
-        ConstMsgID.s2c_turnop, 
         "s2c_turnop", 
         handler(self, self._onMsgTurnCommand))
 

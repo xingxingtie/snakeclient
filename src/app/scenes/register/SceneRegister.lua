@@ -1,7 +1,6 @@
 --注册场景
 local M = class("SceneRegister", cc.Scene)
 local SceneRoom = require("app.scenes.room.SceneRoom")
-local ConstMsgID = require("app.const.ConstMsgID")
 
 function M:ctor(onRegisterSuccess) 
     self._onRegisterSuccess = onRegisterSuccess
@@ -26,7 +25,6 @@ function M:_initUI()
 
     --
     G_MsgManager:registerMsgProcess(
-        ConstMsgID.s2c_register, 
         "s2c_register", 
         handler(self, self._onMsgRegister))
 end
@@ -47,6 +45,10 @@ end
 --登录
 function M:_onBtnRegister()
 
+    self._TFAccount:setString("魔尊")
+    self._TFPassword:setString("123456789abc")
+    self._TFConfirmPassword:setString("123456789abc")
+
     local password = self._TFPassword:getString()
     local confirm_password = self._TFConfirmPassword:getString()
 
@@ -56,10 +58,9 @@ function M:_onBtnRegister()
     end
 
     local code = G_MsgManager:packData(
-        ConstMsgID.c2s_register, 
         "c2s_register", 
         {
-            account = self._TFAccount:getString(),
+            account  = self._TFAccount:getString(),
             password = self._TFPassword:getString(),
         })
 
