@@ -19,10 +19,10 @@ function M:addEventListener(evt, listener, tag)
 end
 
 --消息分发
-function M:dispatchEvent(evt, data)
+function M:dispatchEvent(evt, ...)
     for k, v in pairs(self._pool) do 
         if v[evt] then 
-            v[evt](data)
+            v[evt](...)
         end
     end
 end
@@ -33,7 +33,7 @@ function M:removeEventListenerByTag(tag)
 end
 
 --删除一个事件注册
-function M:removeEventListenerByTag(tag, evt)
+function M:removeEventListener(tag, evt)
     local record = self._pool[tag]
 
     if not record then return end

@@ -3,6 +3,8 @@ local SceneRoom = require("app.scenes.room.SceneRoom")
 local SceneRegister = require("app.scenes.register.SceneRegister")
 local cursor  = require("app.tool.cursor")
 local layoutScrollView  = require("app.tool.layoutScrollView")
+local RoomItem = require("app.scenes.hall.RoomItem")
+local errorCode = require("proto.errorCode")
 
 function M:ctor() 
     self:_initUI()
@@ -44,17 +46,24 @@ function M:_registerMsgProcess()
         handler(self, self._onMsgEnterRoom))    
 end
 
+function M:_unregisterMsgProcess()
+    G_MsgManager:UnregisterMsgProcess("s2c_listRoom")
+    G_MsgManager:UnregisterMsgProcess("s2c_createRoom")
+    G_MsgManager:UnregisterMsgProcess("s2c_enterRoom")
+end
+
 function M:_onMsgListRoom(msg)
-    --self:toast("_onMsgListRoom" .. #msg.roomList)
     local innerC = self.scrollView:getInnerContainer()
-    innerC:removeAllChildren()
+    innerC:removeAllChildren()                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              
+    
+    if not msg.roomList then
+        return
+    end
 
     local itemList = {}
     for _, v in ipairs(msg.roomList) do 
-        local item = require("res.ui.room_item").create().root
-        local strNum = string.format("%d/%d", v.playerNum, v.capacity)
-        item:getChildByName("bg"):getChildByName("num"):setString(strNum)
-        item:getChildByName("bg"):getChildByName("name"):setString(v.ownerName)
+        local item = RoomItem:create(handler(self, self._applyEnterRoom))
+        item:update(v)
         table.insert(itemList, item)
     end
 
@@ -72,11 +81,21 @@ function M:_onMsgCreateRoom(msg)
 end
 
 function M:_onMsgEnterRoom(msg)
-    if msg.retCode == 0 then 
+    print("尝试进入房间。。。。。。。")
+    if msg.retCode == 0 or msg.retCode == errorCode.ALREADY_IN_ROOM then 
         self:toast("进入房间成功")
+        display.runScene(SceneRoom:create())
     else
         self:toastErrorCode(msg.retCode)
     end
+end
+
+function M:_applyEnterRoom(roomInfo)
+    local code = G_MsgManager:packData(
+        "c2s_enterRoom", 
+        {roomID = roomInfo.roomID})
+
+    G_SocketTCP:send(code)
 end
 
 function M:_onBtnCreateRoom()
@@ -96,6 +115,10 @@ end
 --进入
 function M:onEnter()
    
+end
+
+function M:onExit()
+    self:_unregisterMsgProcess()
 end
 
 return M

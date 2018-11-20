@@ -1,0 +1,67 @@
+local M = {}
+
+M.s2c_enterTeam = 1
+
+M.s2c_createRoom = 2
+
+M.c2s_enterRoom = 3
+
+M.c2s_playerMatch = 4
+
+M.c2s_startGame = 5
+
+M.s2c_login = 6
+
+M.c2s_register = 7
+
+M.s2c_createTeam = 8
+
+M.s2c_roomInfo = 9
+
+M.s2c_register = 10
+
+M.c2s_teamMatch = 11
+
+M.s2c_enterRoom = 12
+
+M.c2s_listTeam = 13
+
+M.s2c_leaveTeam = 14
+
+M.c2s_userCommand = 15
+
+M.s2c_playerMatch = 16
+
+M.c2s_leaveTeam = 17
+
+M.s2c_leaveRoom = 18
+
+M.c2s_listRoom = 19
+
+M.s2c_turnCommand = 20
+
+M.s2c_playerJoinTeam = 21
+
+M.s2c_playerJoinRoom = 22
+
+M.s2c_startGame = 23
+
+M.c2s_login = 24
+
+M.s2c_teamMatch = 25
+
+M.c2s_leaveRoom = 26
+
+M.s2c_listRoom = 27
+
+M.c2s_createRoom = 28
+
+M.c2s_enterTeam = 29
+
+M.c2s_createTeam = 30
+
+M.c2s_roomInfo = 31
+
+M.s2c_listTeam = 32
+
+return M

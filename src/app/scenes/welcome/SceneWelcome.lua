@@ -11,13 +11,14 @@ function M:onCreate()
     self:enableNodeEvents()
 
     self:_initUI()
+
+    print("构造 sceneWelcome")
 end
 
 function M:_initUI()
     -- display.newSprite("bg.jpg")
     --     :move(display.center)
     --     :addTo(self)
-    -- add HelloWorld label
 
     local label = cc.Label:createWithSystemFont("欢迎界面", "Arial", 40)
         :move(0, display.height)
@@ -35,12 +36,16 @@ function M:_initUI()
     btn:setAnchorPoint(0.5, 0.5)
 end
 
+
 --按键进入
 function M:onBtnEnterClick(sender)
-    G_Signal:addEventListener(EventConst.EVENT_CONNECT, handler(self,self._onEventConnect), 1)
+    G_Signal:addEventListener(
+        EventConst.EVENT_CONNECT, 
+        handler(self,self._onEventConnect), 
+        "sceneWelcome")
 
     --开始连接服务器
-    print("尝试连接")
+    print("尝试连接1111")
     G_SocketTCP:connect(Const.IP, 8888)
 end
 
@@ -57,6 +62,8 @@ end
 --离开
 function M:onExit()
     print("离开欢迎界面")
+
+    G_Signal:removeEventListenerByTag("sceneWelcome")
 end
 
 return M

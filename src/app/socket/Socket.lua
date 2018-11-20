@@ -29,10 +29,28 @@ function M:_checkTcpConnect()
     end
 end
 
+--尝试连接 1秒钟尝试一次
+function M:_tryConnect(ip, port)
+    local checkConnect = function()
+        if self._connecting then
+            cc.Director:getInstance():getScheduler():unscheduleScriptEntry(self._timer)
+        else 
+            self._sock:connect(ip, port)
+        end
+    end
+
+    self._timer = cc.Director:getInstance():getScheduler():scheduleScriptFunc(
+        checkConnect,
+        1,
+        false)
+
+    self._sock:connect(ip, port)
+end
+
 --连接
 function M:connect(ip, port)
     if (self._type == SOCKETCONST.SOCKTYPE_TCP) then 
-        self._sock:connect(ip, port)
+        self:_tryConnect(ip, port)
     else 
         self._sock:setpeername(ip, port)
     end
@@ -54,6 +72,14 @@ function M:update()
             if receive_status == "closed" then
                 self._callback(EventConst.EVENT_DISCONNECT)
                 self._connecting = false
+
+                local ip, port = self._sock:getpeername()
+                self._sock:shutdown()
+                self._sock:close()
+
+                self._sock = socket.tcp()
+                self._sock:settimeout(0)
+                self:connect(ip, port)  --断线后立马尝试重连
             else 
                 if((response or particle) and string.len(particle) ~= 0) then 
                     self._callback(EventConst.EVENT_DATA, response or particle)

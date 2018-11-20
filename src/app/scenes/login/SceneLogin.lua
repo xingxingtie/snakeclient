@@ -39,10 +39,14 @@ function M:_registerMsgProcess()
         handler(self, self._onMsgLogin))
 end
 
+function M:_unregisterMsgProcess()
+    G_MsgManager:UnregisterMsgProcess("s2c_login")
+end
+
 --登录成功
 function M:_onMsgLogin(msg)    
     if msg.retCode == 0 then 
-        G_GameData:setGameID(msg.id)
+        G_GameData:setUserID(msg.id)
         display.runScene(SceneHall:create())
     else
         self:toastErrorCode(msg.retCode)
@@ -81,6 +85,10 @@ end
 --进入
 function M:onEnter()
    
+end
+
+function M:onExit()
+    self:_unregisterMsgProcess()
 end
 
 return M

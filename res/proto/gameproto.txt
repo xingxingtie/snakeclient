@@ -66,11 +66,11 @@
    newPlayer 0: userInfo
 }
 
-.c2s_leaveTeam {      #申请离队
+.c2s_playerLeaveTeam {      #申请离队
     
 }
 
-.s2c_leaveTeam {      #申请离队回应
+.s2c_playerLeaveTeam {      #申请离队回应
     retCode 0: integer   
     userID  1: integer
     newLeader 2: integer
@@ -148,18 +148,27 @@
 }
 
 .s2c_playerJoinRoom { #通知有玩家加入房间
-    position 0: integer
-    userInfo 1: roomPlayerInfo
+    playerinfo 0: roomPlayerInfo
 }
 
-.c2s_leaveRoom {      #离开房间 离开房间后会自动进入大厅
+.c2s_playerLeaveRoom {      #离开房间 离开房间后会自动进入大厅
     
 }
 
-.s2c_leaveRoom {      #通知有人离开房间，并告知当前房主
+.s2c_playerLeaveRoom {      #通知有人离开房间，并告知当前房主
     retCode 0:    integer
     userID  1:    integer
     newOwnerID 2: integer
+}
+
+.c2s_changeSeat {
+    targetSeat 0: integer
+}
+
+.s2c_changeSeat {
+    retCode 0:    integer
+	originSeat 1: integer
+    targetSeat 2: integer
 }
 
 .c2s_startGame {     #通知开始游戏

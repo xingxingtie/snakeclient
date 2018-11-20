@@ -226,6 +226,7 @@ end
 
 local function flattypename(r)
 	for typename, t in pairs(r.type) do
+		
 		for _, f in pairs(t) do
 			local ftype = f.typename
 			local fullname = checktype(r.type, typename, ftype)
@@ -493,7 +494,7 @@ function sparser.parse(text, name)
     if file then
 		local content = file:read("*a")
         io.close(file)
-		return content
+		return content, r
 	end
 	
 	--return data
