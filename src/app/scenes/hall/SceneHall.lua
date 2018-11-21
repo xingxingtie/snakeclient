@@ -81,9 +81,7 @@ function M:_onMsgCreateRoom(msg)
 end
 
 function M:_onMsgEnterRoom(msg)
-    print("尝试进入房间。。。。。。。")
     if msg.retCode == 0 or msg.retCode == errorCode.ALREADY_IN_ROOM then 
-        self:toast("进入房间成功")
         display.runScene(SceneRoom:create())
     else
         self:toastErrorCode(msg.retCode)

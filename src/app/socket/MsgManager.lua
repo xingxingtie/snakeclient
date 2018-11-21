@@ -14,12 +14,15 @@ function M:ctor(fileName)
     self._listener = {}
 
     self:_launchSocket()
+
+    self._frameEventListener = nil
 end
  
 function M:_launchSocket()
     cc.Director:getInstance():getScheduler():scheduleScriptFunc(
         function(dt) 
             G_SocketTCP:update()
+            if self._frameEventListener then self._frameEventListener(dt) end
         end,
         0,          --0 每帧都会被调用
         false)
@@ -36,7 +39,7 @@ function M:_dispatchPackage(packArr)
         local msg = self._sp:decode(info.__protoName, pack.data)
         local listenerList = info.__listenerList
 
-        dump( msg, info.__protoName)
+        --dump( msg, info.__protoName)
 
         for k,v in pairs(listenerList) do 
             v(msg)
@@ -95,9 +98,10 @@ function M:UnregisterMsgProcess(protoName, flag)
     info.__listenerList[flag] = nil
 end
 
+local EmptyTab = {}
 function M:packData(protoName, tab)
     assert(ConstMsgID[protoName], "协议id不能为空")
-    tab = tab or {}
+    tab = tab or EmptyTab
 
     local msgid = ConstMsgID[protoName]
     local code = self._sp:encode(protoName, tab)
@@ -105,6 +109,10 @@ function M:packData(protoName, tab)
 
     code = string.pack(">HIA", len + 4, msgid, code)   
     return code
+end
+
+function M:RegisterFrameEventListener(listener)
+    self._frameEventListener = listener
 end
 
 return M

@@ -1,6 +1,8 @@
 
 local SceneSandTable = require("app.scenes.sandtable.SceneSandTable")
+local TcpTest = require("app.scenes.tcpTest.TcpTest")
 local PlayerItem = require("app.scenes.room.PlayerItem")
+
 
 local PLAYER_UI_NUM = 6
 
@@ -83,9 +85,19 @@ end
 
 --游戏开始
 function M:_onMsgStartGame(msg)
-    self._sandScene:run(msg.turnCmd)
+    if msg.retCode ~= 0 then 
+        self:toastErrorCode(msg.retCode)
 
-    display.runScene(self._sandScene)
+    else 
+        local playerInfo = {}
+        for _, v in ipairs(self._playerUIList) do 
+            local info = v:getData()
+            table.insert(playerInfo, info)
+        end
+
+        display.runScene(
+            TcpTest:create(playerInfo, msg))
+    end
 end
 
 function M:_onMsgRoomInfo(msg)
@@ -96,8 +108,6 @@ function M:_onMsgRoomInfo(msg)
 
         for _, info in ipairs(msg.userList) do
             local item = self._playerUIList[info.position]
-
-            print("房主id", info.userID, msg.ownerID)
 
             item:update(info, info.userID == msg.ownerID)
         end
@@ -127,6 +137,12 @@ function M:_onMsgChangeSeat(msg)
     else 
         self:toastErrorCode(msg.retCode)
     end
+end
+
+function M:_onBtnStart()
+    local code = G_MsgManager:packData(
+        "c2s_startGame")
+    G_SocketTCP:send(code)
 end
 
 function M:onEnter()

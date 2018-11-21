@@ -178,9 +178,15 @@
 .s2c_startGame {    
     retCode  0:    integer
     turnTime 1:    integer          #一回合的毫秒数 
-    turnCmd  2:    s2c_turnCommand  #用来指导客户端第1回合的运行
 }
 
+.c2s_loadComplete {  #报告载入完成
+    
+}
+
+.s2c_launch {        #发射
+    
+}
 
 .c2s_userCommand {
     cmd     0: integer
@@ -188,8 +194,7 @@
 }
 
 .s2c_turnCommand {  #一回合的玩家操作数据,必定包含有所有玩家的操作
-    turnIndex  0: integer
-    turnCmd    1: *c2s_userCommand
+    turnCmd    0: *c2s_userCommand
 }
 
 .pingAsk {          #ping测试请求
