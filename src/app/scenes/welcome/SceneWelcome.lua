@@ -20,6 +20,9 @@ function M:_initUI()
     --     :move(display.center)
     --     :addTo(self)
 
+    display.newLayer(cc.c3b(255, 255, 255))
+        :addTo(self)
+
     local label = cc.Label:createWithSystemFont("欢迎界面", "Arial", 40)
         :move(0, display.height)
         :addTo(self)
@@ -54,9 +57,23 @@ function M:_onEventConnect()
     display.runScene(SceneLogin:create())
 end
 
+-- function M:kkk()
+--     self:callAfter(0.1, handler(self, self.kkk))
+-- end
+
 --进入
 function M:onEnter()
-   
+    -- self:callAfter(0, handler(self, self.kkk))
+
+    -- local node = display.newSprite("head.jpg")
+    --     :addTo(self)
+    --     :move(0,300)
+    -- node:setScale(0.3)
+
+    -- node:moveTo({
+    --     time = 60,
+    --     x = 1280,
+    --     y = 300})
 end
 
 --离开
