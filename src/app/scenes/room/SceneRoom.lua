@@ -1,7 +1,7 @@
 
 local SceneSandTable = require("app.scenes.sandtable.SceneSandTable")
---local TcpTest = require("app.scenes.tcpTest.TcpTest")
-local TcpTest = require("app.scenes.answerlockstep.TcpTest")
+local TcpTest = require("app.scenes.tcpTest.TcpTest")
+--local TcpTest = require("app.scenes.answerlockstep.TcpTest")
 local PlayerItem = require("app.scenes.room.PlayerItem")
 
 

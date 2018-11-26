@@ -45,13 +45,16 @@ function M:_frameUpdate(dt)
 end
 
 function M:_onMsgTurnCommand(msg)
+    local turnIndex = msg.turnIndex
+    --分发命令
     for _, v in ipairs(msg.turnCmd) do 
         local role = self._roleList[v.userID]
-        role:onCommand(v.cmd, M.preTime)
+        role:onCommand(v.cmd, self._turnDuration, turnIndex)
     end
 
+    --沙盘推演
     for _, v in pairs(self._roleList) do 
-        v:updateLogic(self._turnDuration)
+        v:onCommand(nil, self._turnDuration, turnIndex)
     end 
 end
 
@@ -65,9 +68,7 @@ function M:onEnter()
     local onKeyReleased = function ( keycode, event )    
         local code = G_MsgManager:packData(
             "c2s_userCommand", {cmd = keycode})
-
         M.preTime = os.clock()
-
         G_SocketTCP:send(code)
     end
     
