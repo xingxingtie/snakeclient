@@ -116,6 +116,7 @@ function Node:rotateBy(args)
 end
 
 function Node:scaleTo(args)
+    print("scale", args.scale)
     transition.scaleTo(self, args)
     return self
 end

@@ -3,7 +3,6 @@
 --一个格子的占据并非在一帧内完成，为了表现平滑会经历多帧蛇头才会占据格子
 
 local SnakeStage = require("app.scenes.sandtable.SnakeStage")
-local MapRTData = require("app.data.MapRTData")
 local M = class("LayerMap", cc.Layer)
 
 function M:ctor(line, row, mapWidth, mapHeight)
@@ -18,7 +17,6 @@ function M:ctor(line, row, mapWidth, mapHeight)
     self._mapRTData = MapRTData:create()
 
     self._snakeList = {}
-
     self:_initUI()
 end
 
@@ -26,14 +24,15 @@ function M:_initUI()
     local bg = display.newSprite("map.jpg")
         :addTo(self)
         :move(display.cx, display.cy)
-    bg:setScale(1.4)
+    local scale = display.width / bg:getContentSize().width
+    bg:setScale(scale)
 end
 
 --获取地图像素坐标
 function M:_dataPosToMapPos(dataX, dataY)
     local X = dataX * self._tileWidth  - self._tileWidth  / 2
     local Y = dataY * self._tileHeight - self._tileHeight / 2
-
+    
     return X, Y
 end
 

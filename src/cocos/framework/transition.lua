@@ -146,6 +146,7 @@ end
 
 function transition.scaleTo(target, args)
     assert(not tolua.isnull(target), "transition.scaleTo() - target is not cc.Node")
+    print("what", args)
     local action
     if args.scale then
         action = cc.ScaleTo:create(checknumber(args.time), checknumber(args.scale))

@@ -1,7 +1,6 @@
 --tcp 帧同步测试
 --前端自己没有逻辑帧，使用后端逻辑帧到达的时间当成前端的逻辑帧
 --前端指令在按下键的时候立马发出
-
 --测试结果：前端画面会有抖动不平滑
 
 local Role = require("app.scenes.tcpTest.role")
@@ -23,7 +22,7 @@ function M:_initUI(playerList)
     for _, v in ipairs(playerList) do 
         local role = Role:create()
             :addTo(self)
-
+            
         self._roleList[v.userID] = role
     end
 end
@@ -46,6 +45,7 @@ end
 
 function M:_onMsgTurnCommand(msg)
     local turnIndex = msg.turnIndex
+
     --分发命令
     for _, v in ipairs(msg.turnCmd) do 
         local role = self._roleList[v.userID]
@@ -54,7 +54,9 @@ function M:_onMsgTurnCommand(msg)
 
     --沙盘推演
     for _, v in pairs(self._roleList) do 
-        v:onCommand(nil, self._turnDuration, turnIndex)
+        if (v:getTurnIndex() ~= turnIndex) then 
+            v:onCommand(nil, self._turnDuration, turnIndex)
+        end
     end 
 end
 
@@ -73,11 +75,12 @@ function M:onEnter()
     end
     
     local listener = cc.EventListenerKeyboard:create()
-    listener:registerScriptHandler(onKeyReleased, cc.Handler.EVENT_KEYBOARD_RELEASED )
+    listener:registerScriptHandler(onKeyReleased, cc.Handler.EVENT_KEYBOARD_RELEASED)
     local eventDispatcher = self:getEventDispatcher()
     eventDispatcher:addEventListenerWithSceneGraphPriority(listener, self)
 
-    G_MsgManager:RegisterFrameEventListener(handler(self, self._frameUpdate))
+    G_MsgManager:RegisterFrameEventListener(
+        handler(self, self._frameUpdate))
 
     local code = G_MsgManager:packData("c2s_loadComplete")
     G_SocketTCP:send(code)

@@ -1,9 +1,6 @@
 
 local SceneSandTable = require("app.scenes.sandtable.SceneSandTable")
-local TcpTest = require("app.scenes.tcpTest.TcpTest")
---local TcpTest = require("app.scenes.answerlockstep.TcpTest")
 local PlayerItem = require("app.scenes.room.PlayerItem")
-
 
 local PLAYER_UI_NUM = 6
 
@@ -64,11 +61,11 @@ function M:_registerMsgProcess()
 end
 
 function M:_unregisterMsgProcess()
-    G_MsgManager:UnregisterMsgProcess("s2c_startGame")
-    G_MsgManager:UnregisterMsgProcess("s2c_roomInfo")
-    G_MsgManager:UnregisterMsgProcess("s2c_playerJoinRoom")
-    G_MsgManager:UnregisterMsgProcess("s2c_playerLeaveRoom")
-    G_MsgManager:UnregisterMsgProcess("s2c_changeSeat")
+    G_MsgManager:unregisterMsgProcess("s2c_startGame")
+    G_MsgManager:unregisterMsgProcess("s2c_roomInfo")
+    G_MsgManager:unregisterMsgProcess("s2c_playerJoinRoom")
+    G_MsgManager:unregisterMsgProcess("s2c_playerLeaveRoom")
+    G_MsgManager:unregisterMsgProcess("s2c_changeSeat")
 end
 
 function M:_applyEnterRoom()
@@ -76,7 +73,6 @@ function M:_applyEnterRoom()
 end
 
 function M:_changeSeat(targetSeat)
-
     local code = G_MsgManager:packData(
         "c2s_changeSeat",
         {targetSeat = targetSeat})
@@ -88,7 +84,6 @@ end
 function M:_onMsgStartGame(msg)
     if msg.retCode ~= 0 then 
         self:toastErrorCode(msg.retCode)
-
     else 
         local playerInfo = {}
         for _, v in ipairs(self._playerUIList) do 
@@ -97,7 +92,7 @@ function M:_onMsgStartGame(msg)
         end
 
         display.runScene(
-            TcpTest:create(playerInfo, msg))
+            SceneSandTable:create(playerInfo, msg))
     end
 end
 
@@ -154,7 +149,11 @@ function M:onEnter()
 end
 
 function M:onExit()
-    M:_unregisterMsgProcess()
+    
+end
+
+function M:onCleanup() 
+    self:_unregisterMsgProcess()
 end
 
 function M:onBtnMatchClick()

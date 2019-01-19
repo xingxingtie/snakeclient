@@ -40,7 +40,7 @@ function M:_registerMsgProcess()
 end
 
 function M:_unregisterMsgProcess()
-    G_MsgManager:UnregisterMsgProcess("s2c_login")
+    G_MsgManager:unregisterMsgProcess("s2c_login")
 end
 
 --登录成功

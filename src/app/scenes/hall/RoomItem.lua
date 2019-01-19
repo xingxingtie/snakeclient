@@ -1,4 +1,4 @@
---单个玩家item
+--单个房间item
 
 local M = class("RoomItem", cc.Node)
 
@@ -29,7 +29,6 @@ function M:_render(roominfo)
 end
 
 function M:_onClickNode()
-    print("item 被点击")
     if self._onClick then 
         self._onClick(self._roominfo)
     end

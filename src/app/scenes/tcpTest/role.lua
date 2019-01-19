@@ -43,14 +43,15 @@ end
 
 --更新渲染帧 dt是秒
 function M:update(dt)
-    if not self._moving then 
+    if not self._moving then
         return
     end
 
     self._startTime = self._startTime + dt
     
-    local ratio = self._startTime / self._duration * 1000
-    ratio = ratio > 1 and 1 or ratio
+    local ratio = math.min(
+        self._startTime / self._duration * 1000,
+        1)
 
     self:setPosition(
         self._originPosition.x + (self._targetPosition.x - self._originPosition.x) * ratio, 
@@ -59,7 +60,7 @@ end
 
 --执行命令
 function M:onCommand(command, dt, turnIndex)
-    if self._curTurnIndex == turnIndex then  
+    if self._curTurnIndex == turnIndex then
         return
     end
 
@@ -88,6 +89,10 @@ function M:onCommand(command, dt, turnIndex)
         self._targetPosition.x = self._targetPosition.x + offset
         self._moving = true
     end
+end
+
+function M:getTurnIndex() 
+    return self._curTurnIndex
 end
 
 return M

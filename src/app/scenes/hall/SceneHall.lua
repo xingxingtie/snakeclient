@@ -47,9 +47,9 @@ function M:_registerMsgProcess()
 end
 
 function M:_unregisterMsgProcess()
-    G_MsgManager:UnregisterMsgProcess("s2c_listRoom")
-    G_MsgManager:UnregisterMsgProcess("s2c_createRoom")
-    G_MsgManager:UnregisterMsgProcess("s2c_enterRoom")
+    G_MsgManager:unregisterMsgProcess("s2c_listRoom")
+    G_MsgManager:unregisterMsgProcess("s2c_createRoom")
+    G_MsgManager:unregisterMsgProcess("s2c_enterRoom")
 end
 
 function M:_onMsgListRoom(msg)

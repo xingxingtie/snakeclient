@@ -1,145 +1,137 @@
--- 蛇身数据
+
+--在snake这里理应让他看不到任何帧同步的东西
+--1 蛇头占据四个碰撞格子
+--2 每100毫秒蛇头步进一个格子 每个格子8像素
 
 local Const = require("app.const.Const")
+local SnakeStage = require("app.scenes.sandtable.SnakeStage")
 local M = class("SnakeData")
 
-function M:ctor(id, group, SP, EP, dir, moveDuration)
-    self._body = {}
-
-    self._dir = 0    --蛇头方向
-
-    self._id = id
-
-    self._moveTime = moveDuration
-
+-- speed 像素/秒
+function M:ctor(group, headp, tailp, speed, map, mountPoint)
     self._group = group
+    self._speed = speed
+    self._map   = map
+    self._mountPoint = mountPoint
+    self._passPosArr = {}
+    
+    self._cmdHandler = {}
+    self._cmdHandler[Const.CMD_TYPE_KEYBOARD] = handler(self, self._handleKeyboardCMD)
+    self._cmdHandler[Const.CMD_TYPE_MOUSE]    = handler(self, self._handleMouseCMD)
 
-    self:initSnake(SP, EP, dir)
+    self._head = nil
+    self._tail = nil
+    self:_initUI(headp, tailp, speed)
 end
 
- --一节，蛇身由很多节组成
-function M:_constructOneStage(mapX, mapY, x, y, sp)
-    return {
-        dataX = mapX, 
-        dataY = mapY,
-        x = 0,
-        y = 0,
-        targetX = 0,
-        targetY = 0,
-        sp = nil      --sp是显示对象
-    }
-end
+function M:_initUI(headp, tailp, speed, v)
+    self._head = SnakeStage:create(
+        self._mountPoint,
+        self._map:getTileWidth(),
+        self._map:getTileHeight(),
+        speed,
+        true) 
+    self._head:setPosition(headp.x, headp.y) 
+    self._tail = self._head
 
---初始化蛇身  SP:头部位置 EP:尾部位置
---最初蛇身是一条直线
-function M:initSnake(SP, EP, dir)
-    if(SP.x == EP.x) then
-        local step = (SP.y > EP.y) and -1 or 1
-        for y = SP.y, EP.y, step do 
-            local stage = self:_constructOneStage(SP.x, y)
-            table.insert(self._body, stage)    
-        end
-    else
-        local step = (SP.x > EP.x) and -1 or 1
-        for x = SP.x, EP.x, step do 
-            local stage = self:_constructOneStage(x, SP.y)
-            table.insert(self._body, stage)    
-        end
+    local pre = self._head 
+    for i=1, 5 do 
+        local next = SnakeStage:create(
+            self._mountPoint,
+            self._map:getTileWidth(),
+            self._map:getTileHeight(),
+            speed,
+            false)         
+        next:setPosition(headp.x, headp.y) 
+        pre:setNextStage(next)
+        pre = next
     end
 
-    self._dir = dir
-end
-
---向某个方向移动 计算蛇身所有节点的位置
-function M:moveTo(dir, stageWidth, stageHeight)
-    local dirStep = Const.DIR_STEP[dir]
-    local preStage = nil
-
-    local body = self:getBody()
-    --print("蛇身长度", #body)
-    -- for k, v in ipairs(body) do 
-    --     print("move前:", v.x, v.y)
-    -- end
-
-    for k, v in ipairs(self:getBody()) do 
-        if preStage then 
-            v.targetX = preStage.x 
-            v.targetY = preStage.y
-
-            v.dataX = preStage.dataX
-            v.dataY = preStage.dataY
-
-            preStage = v
-           
-        else 
-            v.targetX = v.x + dirStep.x * stageWidth
-            v.targetY = v.y + dirStep.y * stageHeight
-
-            v.dataX = v.dataX + dirStep.x
-            v.dataY = v.dataY + dirStep.y
-
-            preStage = v
-
-            --print("蛇头起始位置:", v.x, v.y)
-            --print("蛇头目标位置:", v.targetX, v.targetY, v.sp:getPosition())
-        end
-    end
-
-    self._dir = dir
-end
-
-function M:update(elapse) 
-    local ratio = elapse / self._moveTime
-
-    for k, v in ipairs(self._body) do 
-        local midX = v.x + (v.targetX - v.x) * ratio
-        local midY = v.y + (v.targetY - v.y) * ratio
-
-        v.sp:move(midX, midY)
+    --竖着的蛇
+    if headp.x == tailp.x then 
+        local cmd =  {x = (headp.y > tailp.y) and Const.keyCode_UP or Const.keyCode_DOWN}
+        self:_handleKeyboardCMD(cmd)
+    elseif headp.y == tailp.y then 
+        local cmd =  {x = (headp.x > tailp.x) and Const.keyCode_RIGHT or Const.keyCode_LEFT}
+        self:_handleKeyboardCMD(cmd)
     end
 end
 
---直接跳到目标位置
-function M:gotoTarget()
-    for k, v in ipairs(self._body) do 
-        v.sp:move(v.targetX, v.targetY)
+--处理键盘命令, 改变方向时将改变蛇头行进的速率
+function M:_handleKeyboardCMD(cmd)
+    local passPos = cc.p(self._head:getPosition())
 
-        v.x = v.targetX
-        v.y = v.targetY
+    if (cmd.x == Const.keyCode_UP) then
+        passPos.y = passPos.y + 8
+    elseif (cmd.x == Const.keyCode_DOWN) then 
+        passPos.y = passPos.y - 8
+    elseif (cmd.x == Const.keyCode_LEFT) then 
+        passPos.x = passPos.x - 8
+    elseif (cmd.x == Const.keyCode_RIGHT) then
+        passPos.x = passPos.x + 8
+    end
+
+    self._head:passKeyPos(passPos)
+end
+
+--更新位置
+function M:_updatePosition(dt)
+    local stage = self._head
+    while stage do 
+        stage:update(dt)
+        stage = stage:getNextStage()
     end
 end
 
---蛇死亡，则移除所有蛇节
-function M:die()
-    for k, v in ipairs(self._body) do 
-        v.sp:die()
+--处理鼠标命令
+function M:_handleMouseCMD()
+
+end
+
+--添加蛇节
+function M:appendStage()
+    local next = SnakeStage:create(
+        self._mountPoint,
+        self._map:getTileWidth(),
+        self._map:getTileHeight(),
+        speed,
+        false)  
+
+    next:setPosition(self._tail:getPosition())
+
+    self._tail:setNextStage(next)
+    next:setPreStage(self._tail)
+    self._tail = next
+end
+
+function M:recordKeyPos()
+    local stage = self._head
+    while stage do 
+        table.insert(self._passPosArr, stage:recordKeyPos())
+        stage = stage:getNextStage()
     end
 end
 
---获取蛇头位置
-function M:getHead()
-    return self._body[1]    
+function M:passKeyPos()
+    local index = 1
+    local stage = self._head:getNextStage()
+    while stage do 
+        stage:passKeyPos(self._passPosArr[index])
+        stage = stage:getNextStage()
+        index = index + 1
+    end 
+    self._passPosArr = {}
 end
 
---获取蛇尾位置
-function M:getTail()
-    return self._body[#self._body]    
+function M:update(dt)
+    self:_updatePosition(dt)
 end
 
-function M:getDir()
-    return self._dir
-end
-
-function M:getID()
-    return self._id
-end
-
-function M:getBody()
-    return self._body
-end
-
-function M:getGroup()
-    return self._group
+function M:doCommand(cmd)
+    local handler = self._cmdHandler[cmd.cmdType]
+    if handler then 
+        handler(cmd)
+    end
 end
 
 return M

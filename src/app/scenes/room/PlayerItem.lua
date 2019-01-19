@@ -21,7 +21,7 @@ function M:_initUI()
     self.btn_changeDesk:onClick(handler(self, self._onBtnChangeSeat))
     self.btn_changeDesk:setVisible(true)
 end
-
+ 
 function M:_render(playerInfo, ifOwner)
     local bg = self._node:getChildByName("bg")
 
@@ -70,7 +70,5 @@ function M:reset()
     self._playerInfo = nil
     self._ifOwner = false
 end
-
-
 
 return M

@@ -1,0 +1,5 @@
+scene 切换顺序
+
+welcome --> login --> hall --> room --> sandtable
+
+sandtable: 沙盘，游戏场景

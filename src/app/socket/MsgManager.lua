@@ -88,7 +88,7 @@ function M:registerMsgProcess(protoName, callback, flag)
     info.__listenerList[flag] = callback
 end
 
-function M:UnregisterMsgProcess(protoName, flag)
+function M:unregisterMsgProcess(protoName, flag)
     local id = ConstMsgID[protoName]
     local info = self._listener[id]
 

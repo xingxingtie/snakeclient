@@ -16,17 +16,11 @@ function M:onCreate()
 end
 
 function M:_initUI()
-    -- display.newSprite("bg.jpg")
-    --     :move(display.center)
-    --     :addTo(self)
-
-    display.newLayer(cc.c3b(255, 255, 255))
+    local bg = display.newSprite("bg.jpg")
         :addTo(self)
-
-    local label = cc.Label:createWithSystemFont("欢迎界面", "Arial", 40)
-        :move(0, display.height)
-        :addTo(self)
-    label:setAnchorPoint(0, 1)
+        :move(display.cx, display.cy)
+    local scale = display.width / bg:getContentSize().width
+    bg:setScale(scale)
 
     local btn = ccui.Button:create("widget/btn_lan.png", "widget/btn_lan.png", "widget/btn_hui.png")
         :move(display.cx, 50)
