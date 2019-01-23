@@ -2,14 +2,7 @@ local M = {}
 
 M.DELTAGROUP = 10000   --队伍放大因子
 
-M.LINE = 50       --地图被分成的行数
-M.ROW  = 89       --地图被分成的列数
-M.MapWidth  = 1280     --地图总宽度
-M.MapHeight = 720      --地图总高度
-
-M.TurnDuration    = 0.1  --一个轮回1000毫秒
-M.StepDuration    = 0.1  --步进一次1000毫秒
---M.ActionCD        = 900   --行动冷却时间也就是说，按键一次900毫秒以后才接受第二次按键
+M.GROUP_FOOD = 100     --食物
 
 M.keyCode_UP = 28
 M.keyCode_DOWN = 29
@@ -20,6 +13,13 @@ M.DIR_UP    = 1
 M.DIR_DOWN  = 2
 M.DIR_LEFT  = 3
 M.DIR_RIGHT = 4
+
+M.KEYCODE_DIR = {
+    [M.keyCode_UP]   =  M.DIR_UP,
+    [M.keyCode_DOWN] =  M.DIR_DOWN,
+    [M.keyCode_LEFT] =  M.DIR_LEFT,
+    [M.keyCode_RIGHT]=  M.DIR_RIGHT,
+}
 
 M.DIR_STEP = {
     [M.DIR_UP] =    {x = 0,  y = 1},

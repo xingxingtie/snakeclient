@@ -23,26 +23,22 @@ end
 
 --初始化碰撞map
 function M:_initCollisionMap(name)
-    local mapConfig = MapConfig[name]
+    self._mapConfig = MapConfig[name]
 
-    self._map = CollisionMap:create(
-        mapConfig.row,
-        mapConfig.line,
-        mapConfig.width,
-        mapConfig.height)
+    self._map = CollisionMap:create(self._mapConfig, self)
 end
 
 --设定和蛇交流都是通过格子编号，蛇内部才进行像素级处理
 function M:_initUI(playerList)
-    for _, v in ipairs(playerList) do
-        local role = Snake:create(
-            0, 
-            cc.p(1, 20),
-            cc.p(0, 20), 
-            1,
-            self._map,
-            self)
-            
+    for i, v in ipairs(playerList) do
+        if v.position <= 5 then 
+            v.group = 1
+        else 
+            v.group = 2
+        end
+
+        local role = Snake:create(self._mapConfig, v, self._map, self)
+
         self._snakeList[v.userID] = role
     end
 
@@ -91,11 +87,18 @@ function M:_frameUpdate(dt)
         return
     end
 
-    for _, v in pairs(self._snakeList) do 
-        v:update(dt)
-    end
-
     self._duration = self._duration - dt
+
+    --地图更新
+    self._map:update(dt)
+
+    for _, v in pairs(self._snakeList) do 
+        v:update(1 - self._duration / self._turnDuration)
+
+        if v:isDie() then 
+            self._snakeList[v:getUserID()] = nil
+        end        
+    end
 end
 
 function M:_onMsgTurnCommand(msg)
@@ -103,22 +106,21 @@ function M:_onMsgTurnCommand(msg)
     self:_frameUpdate(self._duration)
     self._duration = self._turnDuration
 
-    local turnIndex = msg.turnIndex
-
     --分发命令
     for _, v in ipairs(msg.turnCmd) do 
         local role = self._snakeList[v.userID]
-        role:doCommand(v)
+        if role then role:doCommand(v) end
     end
 
     --每条蛇记录并传递关键位置
     for _, v in pairs(self._snakeList) do 
-        v:recordKeyPos()
-        v:passKeyPos()
+        v:updateTargetPos()
     end
 end
 
 function M:_onMsgLaunch()
+    math.randomseed(100)
+
     self._duration = 0
 
     self:_onMsgTurnCommand({turnCmd = {}})

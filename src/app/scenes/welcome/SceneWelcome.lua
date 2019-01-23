@@ -16,11 +16,11 @@ function M:onCreate()
 end
 
 function M:_initUI()
-    local bg = display.newSprite("bg.jpg")
-        :addTo(self)
-        :move(display.cx, display.cy)
-    local scale = display.width / bg:getContentSize().width
-    bg:setScale(scale)
+    -- local bg = display.newSprite("bg.jpg")
+    --     :addTo(self)
+    --     :move(display.cx, display.cy)
+    -- local scale = display.width / bg:getContentSize().width
+    -- bg:setScale(scale)
 
     local btn = ccui.Button:create("widget/btn_lan.png", "widget/btn_lan.png", "widget/btn_hui.png")
         :move(display.cx, 50)
